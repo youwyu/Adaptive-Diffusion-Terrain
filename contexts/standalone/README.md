@@ -56,5 +56,3 @@ asset.apply("pybullet", client_id)
 ```
 
 See the [simulator tutorial](https://github.com/youwyu/Adaptive-Diffusion-Terrain/blob/main/contexts/standalone/tutorials/simulators.md) for complete integrations.
-
-Maintainers: see [Publishing](https://github.com/youwyu/Adaptive-Diffusion-Terrain/blob/main/contexts/standalone/PUBLISHING.md) for the PyPI release process.
