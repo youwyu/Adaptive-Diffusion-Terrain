@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <world name="terrain_teaser">
+    <gravity>0 0 -9.81</gravity>
+    <physics name="default" type="ode">
+      <real_time_update_rate>200</real_time_update_rate>
+      <max_step_size>0.005</max_step_size>
+    </physics>
+    <scene>
+      <ambient>0.45 0.45 0.45 1</ambient>
+      <background>0.08 0.11 0.15 1</background>
+      <shadows>true</shadows>
+    </scene>
+    <light name="sun" type="directional">
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.9 0.85 0.75 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <direction>-0.5 0.4 -1</direction>
+    </light>
+    <model name="teaser_camera">
+      <static>true</static>
+      <pose>5 -5 7 0 0.78 2.36</pose>
+      <link name="camera_link">
+        <sensor name="camera" type="camera">
+          <always_on>true</always_on>
+          <update_rate>15</update_rate>
+          <visualize>false</visualize>
+          <camera>
+            <horizontal_fov>1.05</horizontal_fov>
+            <image><width>480</width><height>360</height><format>R8G8B8</format></image>
+            <clip><near>0.1</near><far>50</far></clip>
+          </camera>
+          <plugin name="ros_camera" filename="libgazebo_ros_camera.so">
+            <ros>
+              <namespace>/terrain_teaser</namespace>
+              <remapping>image_raw:=image</remapping>
+            </ros>
+            <camera_name>camera</camera_name>
+            <frame_name>camera_link</frame_name>
+          </plugin>
+        </sensor>
+      </link>
+    </model>
+  </world>
+</sdf>

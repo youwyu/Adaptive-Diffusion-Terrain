@@ -1,0 +1,3 @@
+recursive-include tutorials *.md
+recursive-include terrain_diffusion/weights *.onnx
+recursive-include terrain_diffusion/licenses *.txt

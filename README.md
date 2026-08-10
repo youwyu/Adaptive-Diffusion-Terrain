@@ -12,9 +12,24 @@
 
 [[project page]](https://www.youwei-yu.com/adtg-sim-to-real)
 
-### TODO
-- [ ] Add consistency diffusion-based 3D wild environment generation
-- [ ] Add standalone code of environment generation for Isaac Gym, Isaac Lab, Mujoco Playground, and Gazebo
+## 🆕 Difficulty-conditioned terrain generation
+
+<p align="center">
+  <img src="assets/consistency-terrain-simulators.gif" width="100%" alt="Consistency-model terrains evolving from difficulty 1 to 100 in six simulators">
+</p>
+
+<p align="center"><b>100 difficulty levels · 6 real simulator captures · moving robots</b></p>
+
+The new standalone consistency-diffusion model generates smooth heightfields at
+any size and difficulty from **1 to 100**, or creates new terrain from existing
+heightfields. It includes a Python API, CLI, 3D rendering, and adapters for
+**IsaacLab, MuJoCo, MuJoCo Playground, MuJoCo Warp, PyBullet, and Gazebo**.
+
+```bash
+pip install adaptive-terrain-diffusion
+```
+
+→ **[Get started with the standalone terrain generator](contexts/standalone/README.md)**
 
 ### Environment Setup
 ```shell
