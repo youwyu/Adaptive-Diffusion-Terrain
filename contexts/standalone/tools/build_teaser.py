@@ -552,13 +552,13 @@ def compose_frames(work_dir: Path) -> Path:
 
     for difficulty in range(1, 101):
         level, accent = difficulty_style(difficulty)
-        canvas = Image.new("RGB", (width, height), "#070b12")
+        canvas = Image.new("RGB", (width, height), "#ffffff")
         draw = ImageDraw.Draw(canvas)
 
         # A restrained glow ties the header to the changing difficulty color.
         glow = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
         glow_draw = ImageDraw.Draw(glow)
-        for radius, alpha in ((250, 8), (170, 12), (95, 18)):
+        for radius, alpha in ((250, 5), (170, 8), (95, 12)):
             glow_draw.ellipse(
                 (width - 220 - radius, -radius, width - 220 + radius, radius),
                 fill=(*accent, alpha),
@@ -571,19 +571,19 @@ def compose_frames(work_dir: Path) -> Path:
         draw.text(
             (91, 21),
             "ENDPOINT-DISTILLED · ONE-STEP GENERATION",
-            fill="#93a4b8",
+            fill="#57606a",
             font=eyebrow_font,
         )
         draw.text(
             (margin, 49),
             "ONE MODEL. 100 TERRAIN DIFFICULTIES.",
-            fill="#f7fafc",
+            fill="#0f172a",
             font=heading_font,
         )
         draw.text(
             (margin, 89),
             "Real captures · six robotics simulators · difficulty-conditioned terrain",
-            fill="#a8b4c5",
+            fill="#57606a",
             font=subheading_font,
         )
 
@@ -596,7 +596,7 @@ def compose_frames(work_dir: Path) -> Path:
         pill_x = number_x - pill_width - 18
         draw.rounded_rectangle((pill_x, 48, pill_x + pill_width, 74), 13, fill=(*accent, 255))
         draw.text((pill_x + 12, 54), level, fill="#071018", font=level_font)
-        draw.text((number_x + 3, 83), "DIFFICULTY / 100", fill="#8796a9", font=level_font)
+        draw.text((number_x + 3, 83), "DIFFICULTY / 100", fill="#6e7781", font=level_font)
 
         progress_left = 940
         progress_right = width - margin
@@ -604,7 +604,7 @@ def compose_frames(work_dir: Path) -> Path:
         draw.rounded_rectangle(
             (progress_left, progress_y, progress_right, progress_y + 5),
             3,
-            fill="#1b2533",
+            fill="#d0d7de",
         )
         progress_width = round((progress_right - progress_left) * difficulty / 100)
         draw.rounded_rectangle(
@@ -619,11 +619,12 @@ def compose_frames(work_dir: Path) -> Path:
             x = margin + index * (card_width + gap)
             panel = rounded_panel(panel, (card_width, card_height))
 
-            # Subtle border and shadow separate visually different renderers.
+            # A light border separates the dark simulator cards cleanly from
+            # GitHub's white README background.
             draw.rounded_rectangle(
                 (x - 1, card_y - 1, x + card_width, card_y + card_height),
                 17,
-                fill=(20, 29, 40, 255),
+                fill=(208, 215, 222, 255),
             )
             canvas.alpha_composite(panel, (x, card_y))
             overlay = Image.new("RGBA", (card_width, 58), (5, 9, 15, 0))

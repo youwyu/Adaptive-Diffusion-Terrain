@@ -29,7 +29,19 @@ pip install adaptive-terrain-diffusion
 
 → **[Get started with the standalone terrain generator](contexts/standalone/README.md)**
 
-### Environment Setup
+### Roadmap
+
+- [ ] 3D off-road scene generation
+
+---
+
+## Isaac Gym policy learning
+
+> [!NOTE]
+> The following setup is for Isaac Gym-based teacher–student policy learning. It is not required to use the standalone terrain generator above.
+
+### Environment setup
+
 ```shell
 git clone https://github.com/youwyu/Adaptive-Diffusion-Terrain.git
 ```
