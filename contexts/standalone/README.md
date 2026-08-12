@@ -1,6 +1,6 @@
 # Terrain Diffusion
 
-Fast, difficulty-conditioned terrain generation with a one-step consistency model and ONNX Runtime.
+Fast, difficulty-conditioned terrain generation with an endpoint-distilled one-step model and ONNX Runtime.
 
 The teaser above shows all 100 difficulties across six simulator renderers.
 

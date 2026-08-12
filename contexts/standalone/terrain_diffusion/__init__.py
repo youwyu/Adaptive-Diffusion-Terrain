@@ -26,4 +26,4 @@ __all__ = [
     "to_raw_heightfield",
 ]
 
-__version__ = "0.4.1"
+__version__ = "0.4.2"

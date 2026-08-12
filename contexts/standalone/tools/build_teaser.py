@@ -81,8 +81,7 @@ def fixed_latent_terrains(generator: TerrainGenerator, seed: int) -> np.ndarray:
     for start in range(0, 100, 16):
         stop = min(start + 16, 100)
         chunks.append(generator._denoise(noisy[start:stop], sigma[start:stop], labels[start:stop]))
-    heights = generator._from_model_space(np.concatenate(chunks), zero_floor=True)
-    return generator._smooth_output(heights)
+    return generator._from_model_space(np.concatenate(chunks), zero_floor=True)
 
 
 def prepare_terrains(work_dir: Path, device: str) -> dict[str, np.ndarray]:

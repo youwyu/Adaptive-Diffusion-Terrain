@@ -268,35 +268,12 @@ class TerrainGenerator:
         shape: tuple[int, int],
         *,
         zero_floor: bool,
-        smooth: bool,
     ) -> np.ndarray:
         heights = self._from_model_space(values, zero_floor=False)
-        if smooth:
-            heights = self._smooth_output(heights)
         result = np.clip(self._resize(heights[:, None], shape)[:, 0], 0.0, self.height_range)
         if zero_floor:
             result -= result.min(axis=(-2, -1), keepdims=True)
         return np.ascontiguousarray(result, dtype=np.float32)
-
-    @staticmethod
-    def _smooth_output(terrains: np.ndarray) -> np.ndarray:
-        """Apply light separable smoothing while preserving each height range."""
-
-        values = np.ascontiguousarray(terrains, dtype=np.float32)
-        original_min = values.min(axis=(-2, -1), keepdims=True)
-        original_span = values.max(axis=(-2, -1), keepdims=True) - original_min
-        kernel = np.array([1, 4, 6, 4, 1], dtype=np.float32) / 16.0
-        mode = "reflect" if min(values.shape[-2:]) > 2 else "edge"
-        padded_x = np.pad(values, ((0, 0), (0, 0), (2, 2)), mode=mode)
-        horizontal = sum(kernel[i] * padded_x[..., i : i + values.shape[-1]] for i in range(5))
-        padded_y = np.pad(horizontal, ((0, 0), (2, 2), (0, 0)), mode=mode)
-        smoothed = sum(kernel[i] * padded_y[:, i : i + values.shape[-2], :] for i in range(5))
-        smoothed_min = smoothed.min(axis=(-2, -1), keepdims=True)
-        smoothed_span = smoothed.max(axis=(-2, -1), keepdims=True) - smoothed_min
-        restored = (smoothed - smoothed_min) * (
-            original_span / np.maximum(smoothed_span, np.finfo(np.float32).eps)
-        ) + original_min
-        return np.where(original_span > 0, restored, values).astype(np.float32, copy=False)
 
     @staticmethod
     def _tile_starts(length: int, tile_size: int, overlap: int) -> list[int]:
@@ -390,7 +367,6 @@ class TerrainGenerator:
         sampling_steps: int | None = None,
         guidance_scale: float | None = None,
         zero_floor: bool = True,
-        smooth: bool = True,
         return_difficulties: bool = False,
     ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
         """Generate one or more terrain heightfields."""
@@ -405,9 +381,7 @@ class TerrainGenerator:
         mode = self._resolve_size_mode(size_mode, output_shape)
         if mode == "resize":
             native = self._sample_native(labels, generator=generator, batch_size=batch_size)
-            terrains = self._resize_output(
-                native, output_shape, zero_floor=zero_floor, smooth=smooth
-            )
+            terrains = self._resize_output(native, output_shape, zero_floor=zero_floor)
         else:
             terrains = self._generate_tiled(
                 labels,
@@ -419,8 +393,6 @@ class TerrainGenerator:
                 batch_size=batch_size,
                 zero_floor=zero_floor,
             )
-            if smooth:
-                terrains = self._smooth_output(terrains)
         return (terrains, displayed) if return_difficulties else terrains
 
     def generate_from(
@@ -438,7 +410,6 @@ class TerrainGenerator:
         sampling_steps: int | None = None,
         guidance_scale: float | None = None,
         zero_floor: bool = True,
-        smooth: bool = True,
         return_difficulties: bool = False,
     ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
         """Create related terrains by consistency-denoising a noisy source."""
@@ -481,9 +452,7 @@ class TerrainGenerator:
                 strength=strength,
                 batch_size=batch_size,
             )
-            generated = self._resize_output(
-                native, output_shape, zero_floor=zero_floor, smooth=smooth
-            )
+            generated = self._resize_output(native, output_shape, zero_floor=zero_floor)
         else:
             generated = self._generate_tiled(
                 labels,
@@ -495,8 +464,6 @@ class TerrainGenerator:
                 batch_size=batch_size,
                 zero_floor=zero_floor,
             )
-            if smooth:
-                generated = self._smooth_output(generated)
         return (generated, displayed) if return_difficulties else generated
 
     vary = generate_from

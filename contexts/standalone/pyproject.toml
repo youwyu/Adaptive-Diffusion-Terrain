@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "adaptive-terrain-diffusion"
-version = "0.4.1"
+version = "0.4.2"
 description = "Fast difficulty-conditioned terrain generation with ONNX Runtime"
 readme = "README.md"
 requires-python = ">=3.10"
