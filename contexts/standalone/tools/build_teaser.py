@@ -30,7 +30,9 @@ ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_OUTPUT = ROOT / "assets" / "consistency-terrain-simulators.gif"
 CAMERA_WORLD = Path(__file__).with_name("teaser") / "gazebo_camera.world"
 TEASER_TOOLS = Path(__file__).with_name("teaser")
+TERRAIN_CACHE = "terrains_endpoint_v042_6x100x128x128.npz"
 PANEL_SIZE = (400, 300)
+CANVAS_SIZE = (1800, 380)
 VERTICAL_SCALE = 1.0
 HORIZONTAL_SCALE = 0.1
 BACKENDS = (
@@ -85,12 +87,10 @@ def fixed_latent_terrains(generator: TerrainGenerator, seed: int) -> np.ndarray:
 
 
 def prepare_terrains(work_dir: Path, device: str) -> dict[str, np.ndarray]:
-    cache = work_dir / "terrains_6x100x128x128.npz"
-    old_cache = work_dir / "terrains_4x100x128x128.npz"
+    cache = work_dir / TERRAIN_CACHE
     terrains = {}
-    source = cache if cache.is_file() else old_cache
-    if source.is_file():
-        with np.load(source) as payload:
+    if cache.is_file():
+        with np.load(cache) as payload:
             terrains = {
                 name: payload[name]
                 for name, _ in BACKENDS
@@ -255,6 +255,22 @@ def capture_playground(terrains: np.ndarray, directory: Path) -> None:
     renderer.close()
 
 
+def style_pybullet_sky(image: np.ndarray) -> np.ndarray:
+    """Replace TinyRenderer's white background with a deep-blue sky."""
+
+    rows = np.linspace(0.0, 1.0, image.shape[0], dtype=np.float32)[:, None, None]
+    sky = (1.0 - rows) * np.array([9, 16, 27], dtype=np.float32) + rows * np.array(
+        [27, 42, 60], dtype=np.float32
+    )
+    sky = np.broadcast_to(sky, image.shape)
+    background = np.clip(
+        (image.astype(np.float32).min(axis=2, keepdims=True) - 210.0) / 40.0,
+        0.0,
+        1.0,
+    )
+    return np.round(image * (1.0 - background) + sky * background).astype(np.uint8)
+
+
 def capture_pybullet(terrains: np.ndarray, directory: Path) -> None:
     import pybullet as bullet
     import pybullet_data
@@ -310,7 +326,9 @@ def capture_pybullet(terrains: np.ndarray, directory: Path) -> None:
         image = np.asarray(rgba, dtype=np.uint8).reshape(
             PANEL_SIZE[1], PANEL_SIZE[0], 4
         )[:, :, :3]
-        save_frame(directory, difficulty, image)
+        # TinyRenderer exposes a flat white background. Blend only those bright
+        # background pixels into the same deep-blue sky used by the other cards.
+        save_frame(directory, difficulty, style_pybullet_sky(image))
         if difficulty % 10 == 0:
             print(f"PyBullet {difficulty}/100", flush=True)
     bullet.disconnect(client)
@@ -477,29 +495,164 @@ def font(size: int, *, bold: bool = False) -> ImageFont.FreeTypeFont:
     return ImageFont.truetype(f"/usr/share/fonts/truetype/dejavu/{name}", size)
 
 
+def difficulty_style(difficulty: int) -> tuple[str, tuple[int, int, int]]:
+    """Return a readable level name and accent color for a difficulty."""
+
+    stops = (
+        (1, "EASY", (41, 211, 190)),
+        (25, "MODERATE", (66, 184, 255)),
+        (50, "CHALLENGING", (250, 204, 21)),
+        (75, "HARD", (251, 146, 60)),
+        (100, "EXTREME", (251, 80, 112)),
+    )
+    level = min(stops, key=lambda item: abs(item[0] - difficulty))[1]
+    for (left, _, left_color), (right, _, right_color) in zip(stops, stops[1:]):
+        if left <= difficulty <= right:
+            amount = (difficulty - left) / (right - left)
+            color = tuple(
+                round(a + amount * (b - a))
+                for a, b in zip(left_color, right_color)
+            )
+            return level, color
+    return stops[-1][1], stops[-1][2]
+
+
+def rounded_panel(image: Image.Image, size: tuple[int, int], radius: int = 16) -> Image.Image:
+    """Crop a simulator capture into a softly rounded cinematic card."""
+
+    fitted = ImageOps.fit(
+        image.convert("RGB"),
+        size,
+        method=Image.Resampling.LANCZOS,
+        centering=(0.5, 0.48),
+    )
+    mask = Image.new("L", size, 0)
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0, size[0] - 1, size[1] - 1), radius, fill=255)
+    fitted.putalpha(mask)
+    return fitted
+
+
 def compose_frames(work_dir: Path) -> Path:
     output = work_dir / "composite"
     output.mkdir(exist_ok=True)
-    heading = font(24, bold=True)
-    label_font = font(16, bold=True)
-    width = PANEL_SIZE[0] * len(BACKENDS)
-    header = 42
+    eyebrow_font = font(14, bold=True)
+    heading_font = font(34, bold=True)
+    subheading_font = font(16)
+    simulator_font = font(16, bold=True)
+    robot_font = font(13)
+    difficulty_font = font(44, bold=True)
+    level_font = font(13, bold=True)
+    width, height = CANVAS_SIZE
+    margin = 18
+    gap = 10
+    header = 112
+    card_width = (width - margin * 2 - gap * (len(BACKENDS) - 1)) // len(BACKENDS)
+    card_height = height - header - margin
+    card_y = header
+
     for difficulty in range(1, 101):
-        canvas = Image.new("RGB", (width, PANEL_SIZE[1] + header), "#10161d")
+        level, accent = difficulty_style(difficulty)
+        canvas = Image.new("RGB", (width, height), "#070b12")
         draw = ImageDraw.Draw(canvas)
-        title = f"Consistency terrain difficulty  {difficulty:03d} / 100"
-        box = draw.textbbox((0, 0), title, font=heading)
-        draw.text(((width - box[2]) / 2, 6), title, fill="#f3f7fa", font=heading)
+
+        # A restrained glow ties the header to the changing difficulty color.
+        glow = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
+        glow_draw = ImageDraw.Draw(glow)
+        for radius, alpha in ((250, 8), (170, 12), (95, 18)):
+            glow_draw.ellipse(
+                (width - 220 - radius, -radius, width - 220 + radius, radius),
+                fill=(*accent, alpha),
+            )
+        canvas = Image.alpha_composite(canvas.convert("RGBA"), glow)
+        draw = ImageDraw.Draw(canvas)
+
+        draw.rounded_rectangle((margin, 17, 78, 43), 13, fill=(*accent, 255))
+        draw.text((31, 22), "NEW", fill="#071018", font=eyebrow_font)
+        draw.text(
+            (91, 21),
+            "ENDPOINT-DISTILLED · ONE-STEP GENERATION",
+            fill="#93a4b8",
+            font=eyebrow_font,
+        )
+        draw.text(
+            (margin, 49),
+            "ONE MODEL. 100 TERRAIN DIFFICULTIES.",
+            fill="#f7fafc",
+            font=heading_font,
+        )
+        draw.text(
+            (margin, 89),
+            "Real captures · six robotics simulators · difficulty-conditioned terrain",
+            fill="#a8b4c5",
+            font=subheading_font,
+        )
+
+        difficulty_text = f"{difficulty:03d}"
+        number_box = draw.textbbox((0, 0), difficulty_text, font=difficulty_font)
+        number_x = width - margin - 18 - (number_box[2] - number_box[0])
+        draw.text((number_x, 35), difficulty_text, fill=(*accent, 255), font=difficulty_font)
+        label_box = draw.textbbox((0, 0), level, font=level_font)
+        pill_width = label_box[2] - label_box[0] + 24
+        pill_x = number_x - pill_width - 18
+        draw.rounded_rectangle((pill_x, 48, pill_x + pill_width, 74), 13, fill=(*accent, 255))
+        draw.text((pill_x + 12, 54), level, fill="#071018", font=level_font)
+        draw.text((number_x + 3, 83), "DIFFICULTY / 100", fill="#8796a9", font=level_font)
+
+        progress_left = 940
+        progress_right = width - margin
+        progress_y = 98
+        draw.rounded_rectangle(
+            (progress_left, progress_y, progress_right, progress_y + 5),
+            3,
+            fill="#1b2533",
+        )
+        progress_width = round((progress_right - progress_left) * difficulty / 100)
+        draw.rounded_rectangle(
+            (progress_left, progress_y, progress_left + progress_width, progress_y + 5),
+            3,
+            fill=(*accent, 255),
+        )
+
         for index, (name, label) in enumerate(BACKENDS):
             panel = Image.open(work_dir / name / f"{difficulty:03d}.png").convert("RGB")
-            panel = ImageOps.fit(panel, PANEL_SIZE, method=Image.Resampling.LANCZOS)
-            x = index * PANEL_SIZE[0]
-            y = header
-            canvas.paste(panel, (x, y))
-            overlay = Image.new("RGBA", (PANEL_SIZE[0], 32), (8, 14, 20, 185))
-            canvas.paste(overlay, (x, y), overlay)
-            draw.text((x + 10, y + 6), label, fill="#ffffff", font=label_font)
-        canvas.save(output / f"frame_{difficulty:03d}.png", optimize=True)
+            simulator, robot = label.split(" · ", 1)
+            x = margin + index * (card_width + gap)
+            panel = rounded_panel(panel, (card_width, card_height))
+
+            # Subtle border and shadow separate visually different renderers.
+            draw.rounded_rectangle(
+                (x - 1, card_y - 1, x + card_width, card_y + card_height),
+                17,
+                fill=(20, 29, 40, 255),
+            )
+            canvas.alpha_composite(panel, (x, card_y))
+            overlay = Image.new("RGBA", (card_width, 58), (5, 9, 15, 0))
+            overlay_draw = ImageDraw.Draw(overlay)
+            for row in range(58):
+                alpha = round(25 + 205 * row / 57)
+                overlay_draw.line((0, row, card_width, row), fill=(5, 9, 15, alpha))
+            canvas.alpha_composite(overlay, (x, card_y + card_height - 58))
+            draw.rounded_rectangle(
+                (x + 12, card_y + 12, x + 43, card_y + 36),
+                12,
+                fill=(7, 11, 18, 190),
+                outline=(*accent, 210),
+                width=1,
+            )
+            draw.text(
+                (x + 21, card_y + 17),
+                f"{index + 1}",
+                fill=(*accent, 255),
+                font=level_font,
+            )
+            text_y = card_y + card_height - 49
+            draw.text((x + 13, text_y), simulator.upper(), fill="#ffffff", font=simulator_font)
+            draw.text((x + 13, text_y + 23), robot, fill="#b8c3d1", font=robot_font)
+            draw.ellipse(
+                (x + card_width - 27, text_y + 7, x + card_width - 17, text_y + 17),
+                fill=(*accent, 255),
+            )
+        canvas.convert("RGB").save(output / f"frame_{difficulty:03d}.png", optimize=True)
     return output
 
 
@@ -515,8 +668,8 @@ def encode_gif(frames: Path, destination: Path) -> None:
             *source,
             "-filter_complex",
             "[0:v]scale=1600:-1:flags=lanczos,split[a][b];"
-            "[a]palettegen=max_colors=128:stats_mode=diff[p];"
-            "[b][p]paletteuse=dither=bayer:bayer_scale=4:diff_mode=rectangle",
+            "[a]palettegen=max_colors=96:stats_mode=diff[p];"
+            "[b][p]paletteuse=dither=bayer:bayer_scale=3:diff_mode=rectangle",
             "-loop",
             "0",
             str(destination),
@@ -531,14 +684,14 @@ def main() -> None:
     terrains = prepare_terrains(args.work_dir, args.device)
     subprocess.run(
         [str(args.isaac_python), str(TEASER_TOOLS / "capture_isaaclab.py"),
-         "--terrains", str(args.work_dir / "terrains_6x100x128x128.npz"),
+         "--terrains", str(args.work_dir / TERRAIN_CACHE),
          "--output", str(args.work_dir / "isaaclab")],
         check=True,
         env={**os.environ, "MUJOCO_GL": "egl", "OMNI_KIT_ACCEPT_EULA": "YES"},
     )
     subprocess.run(
         [str(args.mjlab_python), str(TEASER_TOOLS / "capture_mjlab.py"),
-         "--terrains", str(args.work_dir / "terrains_6x100x128x128.npz"),
+         "--terrains", str(args.work_dir / TERRAIN_CACHE),
          "--output", str(args.work_dir / "mjlab")],
         check=True,
         env={**os.environ, "MUJOCO_GL": "egl"},

@@ -18,8 +18,6 @@
   <img src="assets/consistency-terrain-simulators.gif" width="100%" alt="Consistency-model terrains evolving from difficulty 1 to 100 in six simulators">
 </p>
 
-<p align="center"><b>100 difficulty levels · 6 real simulator captures · moving robots</b></p>
-
 The new standalone consistency-diffusion model generates smooth heightfields at
 any size and difficulty from **1 to 100**, or creates new terrain from existing
 heightfields. It includes a Python API, CLI, 3D rendering, and adapters for
