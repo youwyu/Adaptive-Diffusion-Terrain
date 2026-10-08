@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ADEPT: Adaptive Diffusion Environment for Policy Transfer Sim-to-Real</title>
+  <meta name="description"
+        content="ADEPT and the Adaptive Diffusion Terrain Generator (ADTG): diffusion models that grow training terrains matched to a navigation policy's current ability, for zero-shot sim-to-real transfer.">
+  <meta property="og:title" content="ADEPT: Adaptive Diffusion Environment for Policy Transfer Sim-to-Real">
+  <meta property="og:description" content="Adaptive Diffusion Terrain Generator (CoRL 2024) and ADEPT (RSS 2025 Workshop ROAR).">
+  <meta property="og:image" content="./static/images/rviz.png">
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-PYVRSFMDRL"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag('js', new Date());
+    gtag('config', 'G-PYVRSFMDRL');
+  </script>
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="./static/images/favicon.svg">
+  <script defer src="./static/js/index.js"></script>
+</head>
+<body>
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">ADEPT: Adaptive Diffusion Environment
+          </h1>
+          <h3 class="title is-3 publication-title">for Policy Transfer Sim-to-Real
+          </h3>
+          <picture>
+            <source srcset="./static/images/rviz.webp" type="image/webp">
+            <img class="teaser-figure" src="./static/images/rviz.png" width="4208" height="2182"
+               alt="Kilometer-scale field trial: the robot's path over the elevation map built during deployment.">
+          </picture>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              <a href="https://youwei-yu.com" target="_blank">Youwei Yu</a><sup>1</sup>&nbsp;&nbsp;
+              <a href="https://junhongxu.github.io/" target="_blank">Junhong Xu</a><sup>1</sup>&nbsp;&nbsp;
+              <a href="https://vail-robotics.net/pages/lantaoliu" target="_blank">Lantao Liu</a><sup>1</sup>
+            </span>
+          </div>
+          <div class="is-size-5 publication-authors publication-affiliations">
+            <span class="author-block"><sup>1</sup>Indiana University</span>
+          </div>
+          <h3 class="title is-4 publication-conference">
+            <a href="https://2024.corl.org/" target="_blank"><span>CoRL 2024</span></a>
+            <span class="venue-sep">&middot;</span>
+            <a href="https://roboticsconference.org/2025/program/workshops/" target="_blank"><span>RSS 2025 Workshop ROAR</span></a>
+          </h3>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <span class="link-block">
+                <a href="https://proceedings.mlr.press/v270/yu25a.html"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><svg viewBox="0 0 512 512" aria-hidden="true"><path d="M64 464l48 0 0 48-48 0c-35.3 0-64-28.7-64-64L0 64C0 28.7 28.7 0 64 0L229.5 0c17 0 33.3 6.7 45.3 18.7l90.5 90.5c12 12 18.7 28.3 18.7 45.3L384 304l-48 0 0-144-80 0c-17.7 0-32-14.3-32-32l0-80L64 48c-8.8 0-16 7.2-16 16l0 384c0 8.8 7.2 16 16 16zM176 352l32 0c30.9 0 56 25.1 56 56s-25.1 56-56 56l-16 0 0 32c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-48 0-80c0-8.8 7.2-16 16-16zm32 80c13.3 0 24-10.7 24-24s-10.7-24-24-24l-16 0 0 48 16 0zm96-80l32 0c26.5 0 48 21.5 48 48l0 64c0 26.5-21.5 48-48 48l-32 0c-8.8 0-16-7.2-16-16l0-128c0-8.8 7.2-16 16-16zm32 128c8.8 0 16-7.2 16-16l0-64c0-8.8-7.2-16-16-16l-16 0 0 96 16 0zm80-112c0-8.8 7.2-16 16-16l48 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-32 0 0 32 32 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-32 0 0 48c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-64 0-64z"/></svg></span>
+                  <span>CoRL Paper</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a href="https://arxiv.org/abs/2506.01759"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><svg viewBox="0 0 384 512" aria-hidden="true"><path d="M64 464c-8.8 0-16-7.2-16-16L48 64c0-8.8 7.2-16 16-16l160 0 0 80c0 17.7 14.3 32 32 32l80 0 0 288c0 8.8-7.2 16-16 16L64 464zM64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-293.5c0-17-6.7-33.3-18.7-45.3L274.7 18.7C262.7 6.7 246.5 0 229.5 0L64 0zm56 256c-13.3 0-24 10.7-24 24s10.7 24 24 24l144 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-144 0zm0 96c-13.3 0-24 10.7-24 24s10.7 24 24 24l144 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-144 0z"/></svg></span>
+                  <span>ADEPT arXiv</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a href="https://youtu.be/Ua8HeGvr4Ms"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><svg viewBox="0 0 576 512" aria-hidden="true"><path d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z"/></svg></span>
+                  <span>Youtube</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a href="https://www.bilibili.com/video/BV1iitCeLEmP"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><svg viewBox="0 0 512 512" aria-hidden="true"><path d="M488.6 104.1C505.3 122.2 513 143.8 511.9 169.8V372.2C511.5 398.6 502.7 420.3 485.4 437.3C468.2 454.3 446.3 463.2 419.9 464H92.02C65.57 463.2 43.81 454.2 26.74 436.8C9.682 419.4 .7667 396.5 0 368.2V169.8C.7667 143.8 9.682 122.2 26.74 104.1C43.81 87.75 65.57 78.77 92.02 78H121.4L96.05 52.19C90.3 46.46 87.42 39.19 87.42 30.4C87.42 21.6 90.3 14.34 96.05 8.603C101.8 2.868 109.1 0 117.9 0C126.7 0 134 2.868 139.8 8.603L213.1 78H301.1L375.6 8.603C381.7 2.868 389.2 0 398 0C406.8 0 414.1 2.868 419.9 8.603C425.6 14.34 428.5 21.6 428.5 30.4C428.5 39.19 425.6 46.46 419.9 52.19L394.6 78L423.9 78C450.3 78.77 471.9 87.75 488.6 104.1H488.6zM449.8 173.8C449.4 164.2 446.1 156.4 439.1 150.3C433.9 144.2 425.1 140.9 416.4 140.5H96.05C86.46 140.9 78.6 144.2 72.47 150.3C66.33 156.4 63.07 164.2 62.69 173.8V368.2C62.69 377.4 65.95 385.2 72.47 391.7C78.99 398.2 86.85 401.5 96.05 401.5H416.4C425.6 401.5 433.4 398.2 439.7 391.7C446 385.2 449.4 377.4 449.8 368.2L449.8 173.8zM185.5 216.5C191.8 222.8 195.2 230.6 195.6 239.7V273C195.2 282.2 191.9 289.9 185.8 296.2C179.6 302.5 171.8 305.7 162.2 305.7C152.6 305.7 144.7 302.5 138.6 296.2C132.5 289.9 129.2 282.2 128.8 273V239.7C129.2 230.6 132.6 222.8 138.9 216.5C145.2 210.2 152.1 206.9 162.2 206.5C171.4 206.9 179.2 210.2 185.5 216.5H185.5zM377 216.5C383.3 222.8 386.7 230.6 387.1 239.7V273C386.7 282.2 383.4 289.9 377.3 296.2C371.2 302.5 363.3 305.7 353.7 305.7C344.1 305.7 336.3 302.5 330.1 296.2C323.1 289.9 320.7 282.2 320.4 273V239.7C320.7 230.6 324.1 222.8 330.4 216.5C336.7 210.2 344.5 206.9 353.7 206.5C362.9 206.9 370.7 210.2 377 216.5H377z"/></svg></span>
+                  <span>Bilibili</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a href="https://github.com/youwyu/Adaptive-Diffusion-Terrain"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><svg viewBox="0 0 496 512" aria-hidden="true"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg></span>
+                  <span>Code</span>
+                </a>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h4 class="title is-4">Can terrains grow with the policy?</h4>
+        <div class="content has-text-justified">
+          <p>
+            Model-free reinforcement learning has emerged as a powerful method for developing robust robot control
+            policies capable of navigating through complex and unstructured terrains. The effectiveness of these methods
+            hinges on two pivotal elements: (1) the use of massively parallel physics simulations to expedite policy
+            training, and (2) the deployment of an environment generator tasked with crafting terrains that are
+            sufficiently challenging yet attainable, thereby facilitating continuous policy improvement. Existing methods
+            to environment generation often rely on heuristics constrained by a set of parameters, limiting the diversity
+            and realism.
+          </p>
+          <p>
+            In this work, we introduce the Adaptive Diffusion Terrain Generator (ADTG), a novel method that leverages
+            Denoising Diffusion Probabilistic Models (DDPMs) to dynamically expand an existing training environment by
+            adding more diverse and complex terrains tailored to the current policy. Unlike conventional methods, ADTG
+            adapts the terrain complexity and variety based on the evolving capabilities of the current policy. This is
+            achieved through two primary mechanisms: First, by blending terrains from the initial dataset within their
+            latent spaces using performance-informed weights, ADTG creates terrains that suitably challenge the policy.
+            Secondly, by manipulating the initial noise in the diffusion process, ADTG seamlessly shifts between creating
+            similar terrains for fine-tuning the current policy or entirely novel ones for expanding training diversity.
+            Our experiments show that the policy trained by ADTG outperforms procedural generated and natural
+            environments, along with competing navigation methods.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <h4 class="title is-4">Adaptive Diffusion Terrain Generator</h4>
+    <div class="content has-text-justified">
+      <p>
+        <strong>Adaptive difficulty</strong> (top): the contributions of <em>easy</em> and <em>hard</em> samples are
+        re-weighted so generated terrains match the RL policy's current performance.
+        <strong>Adaptive diversity</strong> (bottom eight): moving the forward diffusion step <em>K</em> from low to high
+        (with 0.5&nbsp;&times;&nbsp;easy + 0.5&nbsp;&times;&nbsp;hard) moves from close variations to entirely new
+        terrains. Drag the slider.
+      </p>
+    </div>
+    <div class="columns is-vcentered interpolation-panel">
+      <div class="column is-3 has-text-centered">
+        <img src="./static/images/easy.png" class="interpolation-image" alt="Easy reference terrain">
+        <p>Easy Environment</p>
+      </div>
+      <div class="column interpolation-video-column">
+        <div id="step-interpolation-image-wrapper">
+          <img src="./static/interpolation/step/000001.jpg" alt="Generated terrains for the selected step">
+        </div>
+        <input class="slider is-fullwidth is-large is-info" id="step-interpolation-slider"
+               step="1" min="1" max="99" value="1" type="range" aria-label="Forward diffusion step">
+      </div>
+      <div class="column is-3 has-text-centered">
+        <img src="./static/images/hard.png" class="interpolation-image" alt="Hard reference terrain">
+        <p class="is-bold">Hard Environment</p>
+      </div>
+    </div>
+
+    <div class="columns is-centered has-text-centered">
+      <div class="column">
+        <div class="content">
+          <h6 class="title is-6">Elevation Environments in Descending Difficulty</h6>
+          <video class="lazy-video" data-autoplay controls muted loop playsinline preload="none"
+                 poster="./static/images/posters/terrains_animation_3d.jpg">
+            <source data-src="./static/videos/terrains_animation_3d.mp4" type="video/mp4">
+          </video>
+        </div>
+      </div>
+      <div class="column">
+        <div class="content">
+          <h6 class="title is-6">Reinforcement Learning Process</h6>
+          <video class="lazy-video" data-autoplay controls muted loop playsinline preload="none"
+                 poster="./static/images/posters/learning_history_histogram.jpg">
+            <source data-src="./static/videos/learning_history_histogram.mp4" type="video/mp4">
+          </video>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <h4 class="title is-4">Zero-Shot Sim-to-Real Generalization Experiments</h4>
+    <div class="columns is-centered has-text-centered">
+      <div class="column">
+        <div class="content">
+          <h6 class="title is-6">ARID</h6>
+          <video class="lazy-video" data-autoplay controls muted loop playsinline preload="none"
+                 poster="./static/images/posters/student1.jpg">
+            <source data-src="./static/videos/student1.mp4" type="video/mp4">
+          </video>
+        </div>
+      </div>
+      <div class="column">
+        <div class="content">
+          <h6 class="title is-6">MUD</h6>
+          <video class="lazy-video" data-autoplay controls muted loop playsinline preload="none"
+                 poster="./static/images/posters/student2.jpg">
+            <source data-src="./static/videos/student2.mp4" type="video/mp4">
+          </video>
+        </div>
+      </div>
+      <div class="column">
+        <div class="content">
+          <h6 class="title is-6">GRAVEL</h6>
+          <video class="lazy-video" data-autoplay controls muted loop playsinline preload="none"
+                 poster="./static/images/posters/student3.jpg">
+            <source data-src="./static/videos/student3.mp4" type="video/mp4">
+          </video>
+        </div>
+      </div>
+    </div>
+    <h6 class="title is-6 has-text-centered dune-title">DUNE</h6>
+    <div class="columns is-centered has-text-centered">
+      <div class="column">
+        <div class="content">
+          <video class="lazy-video" data-autoplay controls muted loop playsinline preload="none"
+                 poster="./static/images/posters/student4.jpg">
+            <source data-src="./static/videos/student4.mp4" type="video/mp4">
+          </video>
+        </div>
+      </div>
+      <div class="column">
+        <div class="content">
+          <video class="lazy-video" data-autoplay controls muted loop playsinline preload="none"
+                 poster="./static/images/posters/student5.jpg">
+            <source data-src="./static/videos/student5.mp4" type="video/mp4">
+          </video>
+        </div>
+      </div>
+    </div>
+
+    <h4 class="title is-4">Kilometer-Scale Field Trial</h4>
+    <div class="content">
+      <!-- The original 115 MB clip is split losslessly (stream copy at a keyframe) into two files under
+           GitHub's 100 MB limit; index.js plays them back to back. -->
+      <video class="lazy-video sequence-video tall-video" data-autoplay controls muted playsinline preload="none"
+             data-parts="./static/videos/adept_part0.mp4 ./static/videos/adept_part1.mp4"
+             poster="./static/images/posters/adept_part0.jpg">
+      </video>
+    </div>
+
+    <h4 class="title is-4">Quadruped Embodiment Locomotion Experiments</h4>
+    <div class="content">
+      <video class="lazy-video" data-autoplay controls muted loop playsinline preload="none"
+             poster="./static/images/posters/dog.jpg">
+        <source data-src="./static/videos/dog.mp4" type="video/mp4">
+      </video>
+      <p>Videos are sped up to 15 seconds, so the robot speeds do not align.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@inproceedings{
+    yu2025adept,
+    title={{ADEPT}: Adaptive Diffusion Environment for Policy Transfer Sim-to-Real},
+    author={Youwei Yu and Junhong Xu and Lantao Liu},
+    booktitle={RSS 2025 Workshop on Resilient Off-road Autonomous Robotics},
+    year={2025},
+    url={https://openreview.net/forum?id=tdgQT1SynU}
+}</code></pre>
+    <pre><code>@inproceedings{
+    yu2024adaptive,
+    title={Adaptive Diffusion Terrain Generator for Autonomous Uneven Terrain Navigation},
+    author={Youwei Yu and Junhong Xu and Lantao Liu},
+    booktitle={8th Annual Conference on Robot Learning},
+    year={2024},
+    url={https://openreview.net/forum?id=xYleTh2QhS}
+}</code></pre>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <p>Page template borrowed from <a href="https://nerfies.github.io/"><span class="dnerf">Nerfies</span></a>.</p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

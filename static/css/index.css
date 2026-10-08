@@ -1,0 +1,210 @@
+body {
+  font-family: 'Noto Sans', sans-serif;
+}
+
+.footer .icon-link {
+    font-size: 25px;
+    color: #000;
+}
+
+.link-block a {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.dnerf {
+  font-variant: small-caps;
+}
+
+.teaser .hero-body {
+  padding-top: 0;
+  padding-bottom: 3rem;
+}
+
+.teaser {
+  font-family: 'Google Sans', sans-serif;
+}
+
+.publication-banner {
+  /* max-height: parent; This is invalid and has been commented out */
+}
+
+.publication-banner video {
+  position: relative;
+  left: auto;
+  top: auto;
+  transform: none;
+  object-fit: fit;
+}
+
+.publication-title {
+    font-family: 'Google Sans', sans-serif;
+}
+
+.publication-authors {
+    font-family: 'Google Sans', sans-serif;
+}
+
+.publication-affiliations {
+    color: #666666;
+    margin-top: 0.25rem;
+}
+
+.publication-conference {
+    color: #0F4BEA;
+    font-family: 'Google Sans', sans-serif;
+    margin-top: 1rem;
+    margin-bottom: 0;
+}
+
+.publication-conference a {
+    color: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.publication-conference a:hover {
+    text-decoration: underline;
+}
+
+.method-figure {
+    margin: 1.25rem 0 1.5rem;
+}
+
+.method-figure img {
+    width: 100%;
+    height: auto;
+}
+
+.publication-venue {
+    color: #555;
+    width: fit-content;
+    font-weight: bold;
+}
+
+.publication-awards {
+    color: #ff3860;
+    width: fit-content;
+    font-weight: bolder;
+}
+
+/* .publication-authors a {
+   color: hsl(204, 86%, 53%) !important;
+} */
+.publication-authors a {
+  color: hsl(0, 0%, 0%) !important;
+}
+
+.publication-authors a:hover {
+    text-decoration: underline;
+}
+
+.author-block {
+  display: inline-block;
+}
+
+.publication-video {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 56.25%;
+    overflow: hidden;
+    border-radius: 10px !important;
+}
+
+.publication-video iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.results-carousel {
+  overflow: hidden;
+}
+
+.results-carousel .item {
+  margin: 5px;
+  overflow: hidden;
+  border: 1px solid #bbb;
+  border-radius: 10px;
+  padding: 0;
+  font-size: 0;
+}
+
+.results-carousel video {
+  margin: 0;
+}
+
+.interpolation-panel {
+  background: #f5f5f5;
+  border-radius: 10px;
+}
+
+.interpolation-panel .interpolation-image {
+  width: 100%;
+  border-radius: 5px;
+}
+
+.interpolation-panel .slider {
+  margin: 0 !important;
+}
+
+#interpolation-image-wrapper {
+  width: 100%;
+}
+
+#interpolation-image-wrapper img {
+  border-radius: 5px;
+}
+
+#dune {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---- additions for the ADEPT / ADTG page ---- */
+.teaser-figure {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0.75rem 0 1rem;
+}
+
+.venue-sep {
+  margin: 0 0.4rem;
+  color: #999;
+}
+
+.publication-links .icon svg {
+  width: 1em;
+  height: 1em;
+  fill: currentColor;
+}
+
+video {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #f5f5f5;
+}
+
+#step-interpolation-image-wrapper img {
+  display: block;
+  width: 100%;
+  border-radius: 5px;
+}
+
+.dune-title {
+  margin-bottom: 0.75rem !important;
+}
+
+/* the field-trial clip is portrait-ish (3640x4320); keep it within the viewport */
+video.tall-video {
+  width: auto;
+  max-width: 100%;
+  max-height: 85vh;
+  margin: 0 auto;
+}
